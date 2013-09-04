@@ -39,3 +39,11 @@ Be aware that the scripts in `moveit_ikfast` automatically update the
   ```
 
  1. Update manifest and move package to proper location
+
+
+## References
+
+ 1. http://wiki.ros.org/Industrial/Tutorials/Create_a_Fast_IK_Solution
+ 1. http://wiki.ros.org/Industrial/Tutorials/Create_a_Fast_IK_Solution/moveit_plugin
+ 1. http://moveit.ros.org/wiki/Kinematics/IKFast
+ 1. http://answers.ros.org/question/65940/difficulty-using-ikfast-generator-need-6-joints-error-with-kuka-youbot/
