@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>moveit_ikfast_simpler</name>
+  <version>0.1.0</version>
+  <description>
+    Convenience scripts for creating IKFast plugins for simple, 
+    serial kinematic chains. Can be used to quickly create plugins 
+    for ROS Industrial manipulators.
+  </description>
+  <author email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn (TU Delft Robotics Institute)</author>
+  <maintainer email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn (TU Delft Robotics Institute)</maintainer>
+  <license>BSD</license>
+
+  <url type="bugtracker">https://github.com/gavanderhoorn/moveit_ikfast_simpler/issues</url>
+  <url type="repository">https://github.com/gavanderhoorn/moveit_ikfast_simpler</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>moveit_ikfast</run_depend>
+  <run_depend>collada_urdf</run_depend>
+</package>

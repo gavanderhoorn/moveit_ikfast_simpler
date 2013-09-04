@@ -1,0 +1,145 @@
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, G.A. vd. Hoorn, TU Delft Robotics Institute
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of the TU Delft Robotics Institute nor the names 
+#    of its contributors may be used to endorse or promote products 
+#    derived from this software without specific prior written 
+#    permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+#!/bin/bash
+
+
+# Usage
+# 
+#    gen_transform6d_ikfast DAE
+# 
+# 
+# 
+
+confirm () {
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [Y/n]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+
+
+# check command line params
+if [ $# -eq 0 ]; then
+  echo -e "Usage: `basename ${0}` DAE\n"
+  exit 64
+fi
+
+# check file exists
+if [ ! -e "${1}" ]; then
+  echo -e "No such file '${1}'\n"
+  exit 74
+fi
+
+
+
+# defaults
+IKFAST_TYPE="transform6d"
+IKFAST_BASELINK="0"
+IKFAST_EELINK="7"
+PLANNING_GROUP="manipulator"
+
+# vars
+DAE_ABS_PATH=`readlink -e ${1}`
+
+ROBOT_NAME=`grep 'node id="visual0' "${DAE_ABS_PATH}" | cut -d '"' -f 4`
+ROBOT_INFO_TXT=`openrave0.8-robot.py --info=links "${DAE_ABS_PATH}"`
+BASELINK_IDX=`echo "${ROBOT_INFO_TXT}" | grep '^base_link' | cut -d ' ' -f 2`
+EELINK_IDX=`echo "${ROBOT_INFO_TXT}" | grep '^tool0' | tr -s ' ' | cut -d ' ' -f 2`
+IKFAST_CPP_NAME="ikfast61_${IKFAST_TYPE}_${ROBOT_NAME}_${PLANNING_GROUP}.cpp"
+
+
+# see if this is a 5dof manipulator
+# TODO: make more robust
+if [ "${EELINK_IDX}" -eq "6" ]; then
+  IKFAST_TYPE="translationdirection5d"
+  IKFAST_CPP_NAME="ikfast61_${IKFAST_TYPE}_${ROBOT_NAME}_${PLANNING_GROUP}.cpp"
+  echo "Switching to ${IKFAST_TYPE} as IKFast type (eelink: ${EELINK_IDX})"
+fi
+
+
+# overview
+echo
+echo "Using following values:"
+echo "  dae path        : ${DAE_ABS_PATH}"
+echo "  robot name      : ${ROBOT_NAME}"
+echo "  planning group  : ${PLANNING_GROUP}"
+echo "  base link idx   : ${BASELINK_IDX}"
+echo "  end link idx    : ${EELINK_IDX}"
+echo "  ikfast type     : ${IKFAST_TYPE}"
+echo "  ikfast cpp path : ${IKFAST_CPP_NAME}"
+echo
+
+
+# ask user
+confirm "Continue with IKFast generation? [Y/n]"
+if [ $? -ne 0 ]; then
+  echo -e "Aborting\n"
+  exit 0
+fi
+
+
+echo
+echo
+echo "-------------------------------------------------------------------"
+echo 
+echo "Invoking ikfast.py"
+echo 
+echo "-------------------------------------------------------------------"
+echo
+
+
+python `openrave0.8-config --python-dir`/openravepy/_openravepy_0_8/ikfast.py \
+  --robot="${DAE_ABS_PATH}" \
+  --iktype=${IKFAST_TYPE} \
+  --baselink=${BASELINK_IDX} \
+  --eelink=${EELINK_IDX} \
+  --savefile=${IKFAST_CPP_NAME}
+
+echo "exit status: $?"
+
+echo
+echo
+echo "-------------------------------------------------------------------"
+echo 
+echo "Done. Can now create the plugin."
+echo 
+echo "-------------------------------------------------------------------"
+echo
