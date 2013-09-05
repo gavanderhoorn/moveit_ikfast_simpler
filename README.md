@@ -41,6 +41,13 @@ Be aware that the scripts in `moveit_ikfast` automatically update the
  1. Update manifest and move package to proper location
 
 
+## Dependencies
+
+ - python
+ - openrave 0.8
+ - sed, grep
+
+
 ## References
 
  1. http://wiki.ros.org/Industrial/Tutorials/Create_a_Fast_IK_Solution
