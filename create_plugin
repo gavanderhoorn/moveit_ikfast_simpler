@@ -79,7 +79,7 @@ IKFAST_CPP_ABS_PATH=`readlink -e ${2}`
 
 ROBOT_NAME=`grep 'node id="visual0' "${DAE_ABS_PATH}" | cut -d '"' -f 4`
 ROBOT_INFO_TXT=`openrave0.8-robot.py --info=links "${DAE_ABS_PATH}"`
-BASELINK_IDX=`echo "${ROBOT_INFO_TXT}" | grep '^base_link' | cut -d ' ' -f 2`
+BASELINK_IDX=`echo "${ROBOT_INFO_TXT}" | grep '^base_link' | tr -s ' ' | cut -d ' ' -f 2`
 EELINK_IDX=`echo "${ROBOT_INFO_TXT}" | grep '^tool0' | tr -s ' ' | cut -d ' ' -f 2`
 PLUGIN_PKG_NAME="${ROBOT_NAME}_ikfast_${PLANNING_GROUP}_plugin"
 
