@@ -196,28 +196,3 @@ echo "Done."
 echo
 echo "-------------------------------------------------------------------"
 echo
-
-
-# ask user
-echo
-confirm "Fixup CMakeLists.txt? [Y/n]"
-if [ $? -ne 0 ]; then
-  echo -e "Aborting\n"
-  exit 0
-fi
-
-
-OLD_DESC_PKG_NAME="${ROBOT_NAME}_moveit_ikfast_plugin_description"
-NEW_DESC_PKG_NAME="${ROBOT_NAME}_manipulator_moveit_ikfast_plugin_description"
-
-sed -i "s/${OLD_DESC_PKG_NAME}/${NEW_DESC_PKG_NAME}/g" ${PLUGIN_PKG_NAME}/CMakeLists.txt
-
-
-echo
-echo
-echo "-------------------------------------------------------------------"
-echo
-echo "Done."
-echo
-echo "-------------------------------------------------------------------"
-echo
