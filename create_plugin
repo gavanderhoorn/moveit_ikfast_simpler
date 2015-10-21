@@ -116,27 +116,58 @@ echo
 echo
 echo "-------------------------------------------------------------------"
 echo
-echo "Creating package in current directory"
+echo "Creating package (if necessary) in current directory"
 echo
 echo "-------------------------------------------------------------------"
 echo
 
 
-# return to workspace
-#cd ${ROS_WORKSPACE}
-
-# create pkg
-catkin_create_pkg -V 0.1.0 -l BSD ${PLUGIN_PKG_NAME}
-
 # update
-rospack profile > /dev/null
+rospack profile >> /dev/null 2>&1
 
 # check
-rospack find ${PLUGIN_PKG_NAME} > /dev/null
+rospack find ${PLUGIN_PKG_NAME} >> /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "Cannot find plugin dir, aborting\n"
-  exit 74
+  # create new pkg if it doesn't exist
+  echo -e "Cannot find plugin package '${PLUGIN_PKG_NAME}'.\n"
+  confirm "Shall I create it? [Y/n]"
+  if [ $? -ne 0 ]; then
+    echo -e "Aborting\n"
+    exit 0
+  fi
+
+  catkin_create_pkg -V 0.1.0 -l BSD ${PLUGIN_PKG_NAME} >> /dev/null 2>&1
+  exit_stat=$?
+  if [ $exit_stat -ne 0 ]; then
+    echo -e "\nError creating plugin package, aborting"
+    exit $exit_stat
+  fi
+
+  # temporarily add new plugin pkg to the pkg path (changes are local to
+  # this script)
+  export ROS_PACKAGE_PATH=$(pwd)/${PLUGIN_PKG_NAME}:$ROS_PACKAGE_PATH
+
+else
+  # found an existing package, ask user whether we should use it
+  confirm "Found existing package '${PLUGIN_PKG_NAME}'. Populate it with plugin files? [Y/n]"
+  if [ $? -ne 0 ]; then
+    echo -e "Aborting\n"
+    exit 0
+  fi
+
 fi
+
+
+# make sure we can find the package in any case
+rospack find ${PLUGIN_PKG_NAME} >> /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "(still) cannot find plugin package '${PLUGIN_PKG_NAME}'."
+  echo "Cannot continue."
+  exit 78
+fi
+
+
+
 
 
 echo
